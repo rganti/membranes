@@ -73,7 +73,7 @@ class Potential(object):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Script for generating tabulated potentials.")
-    parser.add_argument('--wc', '-wc', dest='wc', action='store', type=float, default=0.8, help='range of attraction')
+    parser.add_argument('--wc', '-wc', dest='wc', action='store', type=float, default=1.4, help='range of attraction')
     args = parser.parse_args()
 
     f = open("tabulated_potential", 'w')

@@ -1,3 +1,6 @@
+import math
+
+
 def write_in_script():
     filename = "in.kick"
     f = open(filename, "w")
@@ -43,7 +46,7 @@ def write_in_script():
     f.write("restart         10000 old_config_1.dat  old_config_2.dat\n")
     f.write("fix             0 all rigid/nve molecule\n")
     f.write("fix             2 all langevin 1 1 1 12345\n")
-    f.write("fix             1 all press/berendsen iso 0.0 0.0 1000.0\n")
+    f.write("fix             1 all press/berendsen x 0.0 0.0 1000.0 y 0.0 0.0 1000.0\n")
     f.write("dump            dDUMPALL all custom 500 \"data.lammpstrj\" id type x y z \n")
     f.write("dump_modify     dDUMPALL sort id \n")
 
@@ -81,16 +84,16 @@ if __name__ == "__main__":
     bond_id = 0
     Nangles = 0
     angle_id = 0
-    for j in range(1, int(Ly-1)):
-        for s in range(1, int(Lx-1)):
+    for j in range(1, int(math.floor(Ly)-1)):
+        for s in range(1, int(math.floor(Lx)-1)):
             k += 1
             ID = k
             Vx = s * side_length
             Vy = j * side_length
             Vz = .5 * Lz
 
-            if (12 > j > 9) and (12 > s > 9):
-                if j == 10 and s == 10:
+            if (10 > j > 7) and (10 > s > 7):
+                if j == 8 and s == 8:
                     for q in range(0, 2):
                         m += 1
                         if q == 0:
@@ -127,8 +130,8 @@ if __name__ == "__main__":
                             positions.append("\t " + str(m) + " " + str(k) + " 5 0 " + str(Vx) + " " + str(Vy) +
                                              " " + str(Lz + (q - 2) * side_length) + " 0 0 0 \n")
 
-            elif (10 > j > 7) and (10 > s > 7):
-                if j == 8 and s == 8:
+            elif (5 > j > 2) and (5 > s > 2):
+                if j == 3 and s == 3:
                     for q in range(0, 2):
                         m += 1
                         if q == 0:
