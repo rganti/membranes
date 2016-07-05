@@ -4,7 +4,9 @@ Membrane model as described in Cooke et. al (2008) Efficient tunable generic mod
 To create lammps crystal configuration Kick_in.dat and lmp file in.kick, execute the following commands
 
 mkdir Simulation
+
 cd Simulation/
+
 python ../make_membrane.py
 
 To create tabulated potential that is used by in.kick, run
