@@ -1,4 +1,4 @@
-import math
+import numpy as np
 
 
 def write_in_script():
@@ -57,175 +57,201 @@ def write_in_script():
     f.write("run             15000000\n")
     f.close()
 
-# def make_monomers(xindex, yindex, Vx, Vy, Vz, )
+
+class MakeMembrane(object):
+
+    def __init__(self):
+        self.side_length = 1.1
+        self.Lx_index = self.Ly_index = 20
+        self.Lz = 3 * self.side_length * self.Lx_index
+        self.Lx = self.Lx_index * self.side_length
+        self.Ly = self.Ly_index * self.side_length
+
+        self.positions = ["\nAtoms \n \n"]
+        self.bonds = ["\nBonds \n \n"]
+        self.angles = ["\nAngles \n \n"]
+
+        # m is number of atoms and k is number of 6 atom-molecules
+        self.m = 0
+        self.k = 0
+
+        self.Nbonds = 0
+        self.bond_id = 0
+
+        self.Nangles = 0
+        self.angle_id = 0
+
+    def make_monomer(self, Vx, Vy, Vz):
+        for q in range(0, 2):
+            self.m += 1
+            if q == 0:
+                self.positions.append("\t " + str(self.m) + " " + str(self.k) + " 3 0 " + str(Vx) + " "
+                                      + str(Vy) + " " + str(Vz + (q - 2) * self.side_length) + " 0 0 0 \n")
+            if q == 1:
+                self.positions.append("\t " + str(self.m) + " " + str(self.k) + " 4 0 " + str(Vx) + " "
+                                      + str(Vy) + " " + str(Vz + (q - 2) * self.side_length) + " 0 0 0 \n")
+        for q in range(1, 3):
+            self.m += 1
+            if q == 1:
+                self.positions.append("\t " + str(self.m) + " " + str(self.k) + " 4 0 " + str(Vx) + " "
+                                      + str(Vy) + " " + str(Vz + q * self.side_length) + " 0 0 0 \n")
+            if q == 2:
+                self.positions.append("\t " + str(self.m) + " " + str(self.k) + " 3 0 " + str(Vx) + " "
+                                      + str(Vy) + " " + str(Vz + q * self.side_length) + " 0 0 0 \n")
+
+    def monomer_group(self, min, max, j, s, Vx, Vy, Vz):
+        if (j == min + 1 and s == min + 1) or (j == max - 1 and s == max - 1) or \
+                (j == min + 1 and s == max - 1) or (j == max - 1 and s == min + 1):
+            self.make_monomer(Vx, Vy, Vz)
+
+    # def make_monomer_group(self, j, s, Vx, Vy, Vz):
+    #     min = 26
+    #     max = 31
+    #     if (max > j > min) and (max > s > min):
+    #         self.monomer_group(min, max, j, s, Vx, Vy, Vz)
+    #
+    #     if (max-2 > j > min+1) and (min > s > min-2):
+    #         j_center = np.mean([max-2, min+1])
+    #         print("j_ctr = " + str(j_center))
+    #         s_center = np.mean([min, min-2])
+    #         print("s_ctr = " + str(s_center))
+    #         if j == j_center and s == s_center:
+    #             self.make_monomer(Vx, Vy, Vz)
+    #
+    #     if (max > j > max-2) and (max+2 > s > max):
+    #         j_center = np.mean([max, max-2])
+    #         s_center = np.mean([max+2, max])
+    #         if j == j_center and s == s_center:
+    #             self.make_monomer(Vx, Vy, Vz)
+
+    def make_membrane(self):
+        for j in range(self.Ly_index):
+            for s in range(self.Lx_index):
+                self.k += 1
+                Vx = s * self.side_length
+                Vy = j * self.side_length
+                Vz = .5 * self.Lz
+                min1 = 6
+                max1 = 11
+                # min2 = 26
+                # max2 = 31
+                # min3 = 49
+                # max3 = 54
+
+                if (max1 >= j >= min1) and (max1 >= s >= min1):
+                    self.monomer_group(min1, max1, j, s, Vx, Vy, Vz)
+
+                elif (max1 - 2 >= j >= min1 + 1) and (min1 >= s >= min1 - 2):
+                    j_center = np.mean([max1 - 2, min1 + 1])
+                    s_center = np.mean([min1, min1 - 2])
+                    if j == j_center and s == s_center:
+                        self.make_monomer(Vx, Vy, Vz)
+
+                elif (max1-1 >= j >= min1 + 2) and (max1 + 2 >= s >= max1):
+                    j_center = np.mean([max1 - 1, min1 + 2])
+                    s_center = np.mean([max1 + 2, max1])
+                    if j == j_center and s == s_center:
+                        self.make_monomer(Vx, Vy, Vz)
+
+                # if (max1 - 1 >= j >= min1 + 2) and (max1 + 2 >= s >= max1):
+                #     j_center = np.mean([max1 - 1, min1 + 2])
+                #     s_center = np.mean([max1 + 2, max1])
+                #     if j == j_center and s == s_center:
+                #         self.make_monomer(Vx, Vy, Vz)
+
+                # elif (max2 >= j >= min2) and (max2 >= s >= min2):
+                #     self.monomer_group(min2, max2, j, s, Vx, Vy, Vz)
+                #
+                # elif (max2 - 2 >= j >= min2 + 1) and (min2 >= s >= min2 - 2):
+                #     j_center = np.mean([max2 - 2, min2 + 1])
+                #     s_center = np.mean([min2, min2 - 2])
+                #     if j == j_center and s == s_center:
+                #         self.make_monomer(Vx, Vy, Vz)
+                #
+                # elif (max2-1 >= j >= min2 + 2) and (max2 + 2 >= s >= max2):
+                #     j_center = np.mean([max2 - 1, min2 + 2])
+                #     s_center = np.mean([max2 + 2, max2])
+                #     if j == j_center and s == s_center:
+                #         self.make_monomer(Vx, Vy, Vz)
+                #
+                # elif (max3 >= j >= min3) and (max3 >= s >= min3):
+                #     self.monomer_group(min3, max3, j, s, Vx, Vy, Vz)
+                #
+                # elif (max3 - 2 >= j >= min3 + 1) and (min3 >= s >= min3 - 2):
+                #     j_center = np.mean([max3 - 2, min3 + 1])
+                #     s_center = np.mean([min3, min3 - 2])
+                #     if j == j_center and s == s_center:
+                #         self.make_monomer(Vx, Vy, Vz)
+                #
+                # elif (max3 - 1 >= j >= min3 + 2) and (max3 + 2 >= s >= max3):
+                #     j_center = np.mean([max3 - 1, min3 + 2])
+                #     s_center = np.mean([max3 + 2, max3])
+                #     if j == j_center and s == s_center:
+                #         self.make_monomer(Vx, Vy, Vz)
+
+                else:
+                    for q in range(0, 3):
+                        self.m += 1
+                        if q == 0:
+                            self.positions.append("\t " + str(self.m) + " " + str(self.k) + " 1 0 " + str(Vx) + " " + str(Vy) +
+                                             " " + str(Vz + (q - 2) * self.side_length) + " 0 0 0 \n")
+                            self.bond_id += 1
+                            self.bonds.append("\t " + str(self.bond_id) + " 1 " + str(self.m) + " " + str(self.m + 1) + " \n")
+                            self.Nbonds += 1
+                        if q == 1:
+                            self.positions.append("\t " + str(self.m) + " " + str(self.k) + " 2 0 " + str(Vx) + " " + str(Vy) +
+                                             " " + str(Vz + (q - 2) * self.side_length) + " 0 0 0 \n")
+                            self.bond_id += 1
+                            self.bonds.append("\t " + str(self.bond_id) + " 1 " + str(self.m) + " " + str(self.m + 1) + " \n")
+                            self.Nbonds += 1
+                        if q == 2:
+                            self.positions.append("\t " + str(self.m) + " " + str(self.k) + " 2 0 " + str(Vx) + " " + str(Vy) +
+                                             " " + str(Vz + (q - 2) * self.side_length) + " 0 0 0 \n")
+                            self.angle_id += 1
+                            self.angles.append(
+                                "\t " + str(self.angle_id) + " 1 " + str(self.m - 2) + " " + str(self.m - 1) + " " + str(self.m) + "\n")
+                            self.Nangles += 1
+
+                    for q in range(1, 4):
+                        self.m += 1
+                        if q == 1 or q == 2:
+                            self.positions.append("\t " + str(self.m) + " " + str(self.k) + " 2 0 " + str(Vx) + " " + str(Vy) +
+                                             " " + str(Vz + q * self.side_length) + " 0 0 0 \n")
+                            self.bond_id += 1
+                            self.bonds.append("\t " + str(self.bond_id) + " 1 " + str(self.m) + " " + str(self.m + 1) + " \n")
+                            self.Nbonds += 1
+                        if q == 3:
+                            self.positions.append("\t " + str(self.m) + " " + str(self.k) + " 1 0 " + str(Vx) + " " + str(Vy) +
+                                             " " + str(Vz + q * self.side_length) + " 0 0 0 \n")
+                            self.angle_id += 1
+                            self.angles.append(
+                                "\t " + str(self.angle_id) + " 1 " + str(self.m - 2) + " " + str(self.m - 1) + " " + str(self.m) + "\n")
+                            self.Nangles += 1
 
 if __name__ == "__main__":
 
-    side_length = 1.1
-    Lx = Ly = 15
-    N_ref = 6
+    membrane = MakeMembrane()
+    membrane.make_membrane()
 
-    '''Radius of spheres for proteins.'''
-    radius = 2
-    N_skip = (radius + 1)*(radius + 1)
-
-    '''Box dimensions.'''
-    Lz = 3*side_length*Lx
-    Lx *= side_length
-    Ly *= side_length
-
-    positions = ["\nAtoms \n \n"]
-    bonds = ["\nBonds \n \n"]
-    angles = ["\nAngles \n \n"]
-
-    k = 0
-    m = 0
-    Nbonds = 0
-    bond_id = 0
-    Nangles = 0
-    angle_id = 0
-    for j in range(1, int(math.floor(Ly)-1)):
-        for s in range(1, int(math.floor(Lx)-1)):
-            k += 1
-            ID = k
-            Vx = s * side_length
-            Vy = j * side_length
-            Vz = .5 * Lz
-
-            if (10 > j > 7) and (10 > s > 7):
-                if j == 8 and s == 8:
-                    for q in range(0, 2):
-                        m += 1
-                        if q == 0:
-                            positions.append("\t " + str(m) + " " + str(k) + " 3 0 " + str(Vx) + " " + str(Vy) +
-                                     " " + str(Vz + (q - 2) * side_length) + " 0 0 0 \n")
-                        if q == 1:
-                            positions.append("\t " + str(m) + " " + str(k) + " 4 0 " + str(Vx) + " " + str(Vy) +
-                                     " " + str(Vz + (q - 2) * side_length) + " 0 0 0 \n")
-                    for q in range(1,3):
-                        m += 1
-                        if q == 1:
-                            positions.append("\t " + str(m) + " " + str(k) + " 4 0 " + str(Vx) + " " + str(Vy) +
-                                     " " + str(Vz + q * side_length) + " 0 0 0 \n")
-                        if q == 2:
-                            positions.append("\t " + str(m) + " " + str(k) + " 3 0 " + str(Vx) + " " + str(Vy) +
-                                     " " + str(Vz + q * side_length) + " 0 0 0 \n")
-
-                    # Building Reservoir for exchanging with membrane
-                    for q in range(0, 3):
-                        m += 1
-                        if q == 0:
-                            positions.append("\t " + str(m) + " " + str(k) + " 5 0 " + str(Vx) + " " + str(Vy) +
-                                             " " + str(Lz + (q - 2) * side_length) + " 0 0 0 \n")
-                            # bond_id += 1
-                            # bonds.append("\t " + str(bond_id) + " 1 " + str(m) + " " + str(m+1) + " \n")
-                            # Nbonds += 1
-                        if q == 1:
-                            positions.append("\t " + str(m) + " " + str(k) + " 5 0 " + str(Vx) + " " + str(Vy) +
-                                             " " + str(Lz + (q - 2) * side_length) + " 0 0 0 \n")
-                            # bond_id += 1
-                            # bonds.append("\t " + str(bond_id) + " 1 " + str(m) + " " + str(m+1) + " \n")
-                            # Nbonds += 1
-                        if q == 2:
-                            positions.append("\t " + str(m) + " " + str(k) + " 5 0 " + str(Vx) + " " + str(Vy) +
-                                             " " + str(Lz + (q - 2) * side_length) + " 0 0 0 \n")
-
-            elif (5 > j > 2) and (5 > s > 2):
-                if j == 3 and s == 3:
-                    for q in range(0, 2):
-                        m += 1
-                        if q == 0:
-                            positions.append("\t " + str(m) + " " + str(k) + " 3 0 " + str(Vx) + " " + str(Vy) +
-                                     " " + str(Vz + (q - 2) * side_length) + " 0 0 0 \n")
-                        if q == 1:
-                            positions.append("\t " + str(m) + " " + str(k) + " 4 0 " + str(Vx) + " " + str(Vy) +
-                                     " " + str(Vz + (q - 2) * side_length) + " 0 0 0 \n")
-                    for q in range(1,3):
-                        m += 1
-                        if q == 1:
-                            positions.append("\t " + str(m) + " " + str(k) + " 4 0 " + str(Vx) + " " + str(Vy) +
-                                     " " + str(Vz + q * side_length) + " 0 0 0 \n")
-                        if q == 2:
-                            positions.append("\t " + str(m) + " " + str(k) + " 3 0 " + str(Vx) + " " + str(Vy) +
-                                     " " + str(Vz + q * side_length) + " 0 0 0 \n")
-
-                    # Building Reservoir for exchanging with membrane
-                    for q in range(0, 3):
-                        m += 1
-                        if q == 0:
-                            positions.append("\t " + str(m) + " " + str(k) + " 5 0 " + str(Vx) + " " + str(Vy) +
-                                             " " + str(Lz + (q - 2) * side_length) + " 0 0 0 \n")
-                            # bond_id += 1
-                            # bonds.append("\t " + str(bond_id) + " 1 " + str(m) + " " + str(m+1) + " \n")
-                            # Nbonds += 1
-                        if q == 1:
-                            positions.append("\t " + str(m) + " " + str(k) + " 5 0 " + str(Vx) + " " + str(Vy) +
-                                             " " + str(Lz + (q - 2) * side_length) + " 0 0 0 \n")
-                            # bond_id += 1
-                            # bonds.append("\t " + str(bond_id) + " 1 " + str(m) + " " + str(m+1) + " \n")
-                            # Nbonds += 1
-                        if q == 2:
-                            positions.append("\t " + str(m) + " " + str(k) + " 5 0 " + str(Vx) + " " + str(Vy) +
-                                             " " + str(Lz + (q - 2) * side_length) + " 0 0 0 \n")
-
-            else:
-
-                for q in range(0, 3):
-                    m += 1
-                    if q == 0:
-                        positions.append("\t " + str(m) + " " + str(k) + " 1 0 " + str(Vx) + " " + str(Vy) +
-                                         " " + str(Vz + (q - 2) * side_length) + " 0 0 0 \n")
-                        bond_id += 1
-                        bonds.append("\t " + str(bond_id) + " 1 " + str(m) + " " + str(m+1) + " \n")
-                        Nbonds += 1
-                    if q == 1:
-                        positions.append("\t " + str(m) + " " + str(k) + " 2 0 " + str(Vx) + " " + str(Vy) +
-                                         " " + str(Vz + (q - 2) * side_length) + " 0 0 0 \n")
-                        bond_id += 1
-                        bonds.append("\t " + str(bond_id) + " 1 " + str(m) + " " + str(m+1) + " \n")
-                        Nbonds += 1
-                    if q == 2:
-                        positions.append("\t " + str(m) + " " + str(k) + " 2 0 " + str(Vx) + " " + str(Vy) +
-                                         " " + str(Vz + (q - 2) * side_length) + " 0 0 0 \n")
-                        angle_id += 1
-                        angles.append("\t " + str(angle_id) + " 1 " + str(m-2) + " " + str(m-1) + " " + str(m) + "\n")
-                        Nangles += 1
-
-                for q in range(1, 4):
-                    m += 1
-                    if q == 1 or q == 2:
-                        positions.append("\t " + str(m) + " " + str(k) + " 2 0 " + str(Vx) + " " + str(Vy) +
-                                         " " + str(Vz + q * side_length) + " 0 0 0 \n")
-                        bond_id += 1
-                        bonds.append("\t " + str(bond_id) + " 1 " + str(m) + " " + str(m+1) + " \n")
-                        Nbonds += 1
-                    if q == 3:
-                        positions.append("\t " + str(m) + " " + str(k) + " 1 0 " + str(Vx) + " " + str(Vy) +
-                                         " " + str(Vz + q * side_length) + " 0 0 0 \n")
-                        angle_id += 1
-                        angles.append("\t " + str(angle_id) + " 1 " + str(m-2) + " " + str(m-1) + " " + str(m) + "\n")
-                        Nangles += 1
-
-    Natoms = m
     header = ["LAMMPS Description \n \n",
-              "\t " + str(Natoms) + " atoms \n \t " + str(Nbonds) +
-              " bonds \n \t " + str(Nangles) + " angles \n \t 0 dihedrals \n \t 0 impropers \n",
+              "\t " + str(membrane.m) + " atoms \n \t " + str(membrane.Nbonds) +
+              " bonds \n \t " + str(membrane.Nangles) + " angles \n \t 0 dihedrals \n \t 0 impropers \n",
               "\n \t 5 atom types \n \t 1 bond types \n \t 1 angle types \n \t 0 dihedral types \n \t 0 improper types \n",
-              "\n \t " + str(0.0) + " " + str(Lx) + " xlo xhi\n \t", str(0.0) + " " + str(Ly) + " ylo yhi \n \t",
-              str(0.0) + " " + str(Lz) + " zlo zhi\n", "\nMasses \n \n", "\t 1 1.0000 \n", "\t 2 1.0000 \n",
+              "\n \t " + str(0.0) + " " + str(membrane.Lx) + " xlo xhi\n \t", str(0.0) + " " + str(membrane.Ly) + " ylo yhi \n \t",
+              str(0.0) + " " + str(membrane.Lz) + " zlo zhi\n", "\nMasses \n \n", "\t 1 1.0000 \n", "\t 2 1.0000 \n",
               "\t 3 1.0000 \n", "\t 4 1.0000 \n", "\t 5 1.0000 \n"]
 
     f = open("Kick_in.dat", "w")
     for item in header:
         f.write("%s " % item)
 
-    for item in positions:
+    for item in membrane.positions:
         f.write("%s " % item)
 
-    for item in bonds:
+    for item in membrane.bonds:
         f.write("%s" % item)
 
-    for item in angles:
+    for item in membrane.angles:
         f.write("%s" % item)
 
     write_in_script()
