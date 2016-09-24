@@ -4,7 +4,7 @@ import numpy as np
 def write_in_script():
     filename = "in.kick"
     f = open(filename, "w")
-    f.write("units           lj\natom_style      full\n#read_restart    old_config_1.dat\nread_data       Kick_in.dat\n")
+    f.write("units           lj\natom_style      full\nread_data       Kick_in.dat\n")
     f.write("neighbor        0.3 bin\n")
     f.write("neigh_modify    every 1 delay 1\n")
 
@@ -16,20 +16,22 @@ def write_in_script():
     f.write("pair_coeff      1 1 tabulated_potential HEAD_TAIL\n")
     f.write("pair_coeff      1 3 tabulated_potential MONOMER_HEAD\n")
     f.write("pair_coeff      1 4 tabulated_potential MONOMER_HEAD\n")
-    f.write("pair_coeff      1 5 tabulated_potential MONOMER_HEAD\n")
+    # f.write("pair_coeff      1 5 tabulated_potential MONOMER_HEAD\n")
     f.write("pair_coeff      2 3 tabulated_potential MONOMER_TAIL\n")
     f.write("pair_coeff      2 4 tabulated_potential MONOMER_TAIL\n")
-    f.write("pair_coeff      2 5 tabulated_potential MONOMER_TAIL\n")
+    # f.write("pair_coeff      2 5 tabulated_potential MONOMER_TAIL\n")
     f.write("pair_coeff      3 3 tabulated_potential MONOMER_MONOMER\n")
     f.write("pair_coeff      3 4 tabulated_potential MONOMER_MONOMER\n")
-    f.write("pair_coeff      3 5 tabulated_potential MONOMER_MONOMER\n")
+    # f.write("pair_coeff      3 5 tabulated_potential MONOMER_MONOMER\n")
     f.write("pair_coeff      4 4 tabulated_potential MONOMER_MONOMER\n")
-    f.write("pair_coeff      4 5 tabulated_potential MONOMER_MONOMER\n")
-    f.write("pair_coeff      5 5 tabulated_potential MONOMER_MONOMER\n")
+    # f.write("pair_coeff      4 5 tabulated_potential MONOMER_MONOMER\n")
+    # f.write("pair_coeff      5 5 tabulated_potential MONOMER_MONOMER\n")
+    f.write("pair_modify        shift yes\n\n")
 
-    f.write("pair_modify        shift yes\n")
-    f.write("neigh_modify exclude molecule all\n\n")
     f.write("# Additional variables to check\n")
+    f.write("group           monomer type 3 4\n")
+    # f.write("neigh_modify exclude molecule all\n\n")
+
     f.write("group           head type 1\n")
     f.write("group           tail type 2\n")
     f.write("group           bilayer union head tail\n")
@@ -40,16 +42,14 @@ def write_in_script():
 
     f.write("velocity        all create 1.0 1 \n")
 
-    f.write("fix             MCSWP all atom/swap 10 1 1234 1 types 4 5 \n")
+    # f.write("fix             MCSWP all atom/swap 10 1 1234 1 types 4 5 \n")
 
     f.write("dump            id all xyz 100 kick_out.xyz\n")
-    f.write("restart         10000 old_config_1.dat  old_config_2.dat\n")
-    f.write("fix             0 all rigid/nve molecule\n")
-    f.write("fix             2 all langevin 1 1 1 12345\n")
-    f.write("fix             1 all press/berendsen x 0.0 0.0 1000.0 y 0.0 0.0 1000.0\n")
-    f.write("dump            dDUMPALL all custom 500 \"data.lammpstrj\" id type x y z \n")
-    f.write("dump_modify     dDUMPALL sort id \n")
-
+    f.write("restart         10000 restart.dat\n")
+    # f.write("fix             0 all rigid/nve molecule\n")
+    # f.write("fix             2 all langevin 1 1 1 12345\n")
+    f.write("fix             fNPT bilayer npt temp 1.0 1.0 1 x 0.0 0.0 10 y 0.0 0.0 10 couple xy\n")
+    f.write("fix             fMon monomer rigid/npt molecule temp 1.0 1.0 1 x 0.0 0.0 10 y 0.0 0.0 10 couple xy\n")
     f.write("thermo          3000\n")
     f.write("thermo_style    custom step temp press etotal epair vol v_top v_bottom v_Lz\n")
     f.write("thermo_modify   flush yes\n")
@@ -138,26 +138,26 @@ class MakeMembrane(object):
                 # min3 = 49
                 # max3 = 54
 
-                if (max1 >= j >= min1) and (max1 >= s >= min1):
-                    self.monomer_group(min1, max1, j, s, Vx, Vy, Vz)
-
-                elif (max1 - 2 >= j >= min1 + 1) and (min1 >= s >= min1 - 2):
+                # if (max1 >= j >= min1) and (max1 >= s >= min1):
+                #     self.monomer_group(min1, max1, j, s, Vx, Vy, Vz)
+                #
+                if (max1 - 2 >= j >= min1 + 1) and (min1 >= s >= min1 - 2):
                     j_center = np.mean([max1 - 2, min1 + 1])
                     s_center = np.mean([min1, min1 - 2])
                     if j == j_center and s == s_center:
                         self.make_monomer(Vx, Vy, Vz)
-
-                elif (max1-1 >= j >= min1 + 2) and (max1 + 2 >= s >= max1):
-                    j_center = np.mean([max1 - 1, min1 + 2])
-                    s_center = np.mean([max1 + 2, max1])
-                    if j == j_center and s == s_center:
-                        self.make_monomer(Vx, Vy, Vz)
-
-                # if (max1 - 1 >= j >= min1 + 2) and (max1 + 2 >= s >= max1):
+                #
+                # elif (max1-1 >= j >= min1 + 2) and (max1 + 2 >= s >= max1):
                 #     j_center = np.mean([max1 - 1, min1 + 2])
                 #     s_center = np.mean([max1 + 2, max1])
                 #     if j == j_center and s == s_center:
                 #         self.make_monomer(Vx, Vy, Vz)
+
+                elif (max1 - 1 >= j >= min1 + 2) and (max1 + 2 >= s >= max1):
+                    j_center = np.mean([max1 - 1, min1 + 2])
+                    s_center = np.mean([max1 + 2, max1])
+                    if j == j_center and s == s_center:
+                        self.make_monomer(Vx, Vy, Vz)
 
                 # elif (max2 >= j >= min2) and (max2 >= s >= min2):
                 #     self.monomer_group(min2, max2, j, s, Vx, Vy, Vz)
@@ -236,10 +236,10 @@ if __name__ == "__main__":
     header = ["LAMMPS Description \n \n",
               "\t " + str(membrane.m) + " atoms \n \t " + str(membrane.Nbonds) +
               " bonds \n \t " + str(membrane.Nangles) + " angles \n \t 0 dihedrals \n \t 0 impropers \n",
-              "\n \t 5 atom types \n \t 1 bond types \n \t 1 angle types \n \t 0 dihedral types \n \t 0 improper types \n",
+              "\n \t 4 atom types \n \t 1 bond types \n \t 1 angle types \n \t 0 dihedral types \n \t 0 improper types \n",
               "\n \t " + str(0.0) + " " + str(membrane.Lx) + " xlo xhi\n \t", str(0.0) + " " + str(membrane.Ly) + " ylo yhi \n \t",
               str(0.0) + " " + str(membrane.Lz) + " zlo zhi\n", "\nMasses \n \n", "\t 1 1.0000 \n", "\t 2 1.0000 \n",
-              "\t 3 1.0000 \n", "\t 4 1.0000 \n", "\t 5 1.0000 \n"]
+              "\t 3 1.0000 \n", "\t 4 1.0000 \n"]  # "\t 5 1.0000 \n"]
 
     f = open("Kick_in.dat", "w")
     for item in header:

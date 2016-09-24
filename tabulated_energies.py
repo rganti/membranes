@@ -73,7 +73,7 @@ class Potential(object):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Script for generating tabulated potentials.")
-    parser.add_argument('--wc', '-wc', dest='wc', action='store', type=float, default=1.0, help='range of attraction')
+    parser.add_argument('--wc', '-wc', dest='wc', action='store', type=float, default=1.4, help='range of attraction')
     args = parser.parse_args()
 
     f = open("tabulated_potential", 'w')
@@ -111,8 +111,8 @@ if __name__ == "__main__":
     sigma = 2
     mon_mon = Potential(sigma, w_c)
     r_full, force_mon_mon, v_mon_mon = mon_mon.attractive()
-    # force_mon_mon.fill(0)
-    # v_mon_mon.fill(0)
+    force_mon_mon.fill(0)
+    v_mon_mon.fill(0)
     write_file(f, r_full, force_mon_mon, v_mon_mon, "MONOMER_MONOMER")
 
     f.close()
