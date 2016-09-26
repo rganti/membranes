@@ -30,14 +30,14 @@ def write_in_script():
 
     f.write("# Additional variables to check\n")
     f.write("group           monomer type 3 4\n")
-    # f.write("neigh_modify exclude molecule all\n\n")
 
     f.write("group           head type 1\n")
     f.write("group           tail type 2\n")
     f.write("group           bilayer union head tail\n")
-    f.write("variable        top equal bound(bilayer,zmax)\n")
-    f.write("variable        bottom equal bound(bilayer,zmin)\n")
-    f.write("variable        Lz      equal zhi-zlo\n\n")
+    f.write("variable        top equal bound(monomer,zmax)\n")
+    f.write("variable        bottom equal bound(monomer,zmin)\n")
+    f.write("variable        Lz      equal zhi-zlo\n")
+    f.write("neigh_modify    exclude molecule monomer\n\n")
     f.write("# Fixes\n")
 
     f.write("velocity        all create 1.0 1 \n")
@@ -47,9 +47,10 @@ def write_in_script():
     f.write("dump            id all xyz 100 kick_out.xyz\n")
     f.write("restart         10000 restart.dat\n")
     # f.write("fix             0 all rigid/nve molecule\n")
-    # f.write("fix             2 all langevin 1 1 1 12345\n")
+
     f.write("fix             fNPT bilayer npt temp 1.0 1.0 1 x 0.0 0.0 10 y 0.0 0.0 10 couple xy\n")
-    f.write("fix             fMon monomer rigid/npt molecule temp 1.0 1.0 1 x 0.0 0.0 10 y 0.0 0.0 10 couple xy\n")
+    # f.write("fix             fMon monomer rigid/npt molecule temp 1.0 1.0 1 x 0.0 0.0 10 y 0.0 0.0 10 couple xy\n")
+    f.write("fix             fMon monomer rigid/nvt molecule temp 1.0 1.0 5\n\n")
     f.write("thermo          3000\n")
     f.write("thermo_style    custom step temp press etotal epair vol v_top v_bottom v_Lz\n")
     f.write("thermo_modify   flush yes\n")

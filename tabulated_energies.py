@@ -110,9 +110,9 @@ if __name__ == "__main__":
     # Monomer-Monomer
     sigma = 2
     mon_mon = Potential(sigma, w_c)
-    r_full, force_mon_mon, v_mon_mon = mon_mon.attractive()
-    force_mon_mon.fill(0)
-    v_mon_mon.fill(0)
+    r_full, force_mon_mon, v_mon_mon = mon_mon.repulsive()
+    # force_mon_mon.fill(0)
+    # v_mon_mon.fill(0)
     write_file(f, r_full, force_mon_mon, v_mon_mon, "MONOMER_MONOMER")
 
     f.close()
