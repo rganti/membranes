@@ -50,7 +50,8 @@ def write_in_script():
 
     f.write("fix             fNPT bilayer npt temp 1.0 1.0 1 x 0.0 0.0 10 y 0.0 0.0 10 couple xy\n")
     # f.write("fix             fMon monomer rigid/npt molecule temp 1.0 1.0 1 x 0.0 0.0 10 y 0.0 0.0 10 couple xy\n")
-    f.write("fix             fMon monomer rigid/nvt molecule temp 1.0 1.0 5\n\n")
+    # f.write("fix             fMon monomer rigid/nvt molecule temp 1.0 1.0 5\n\n")
+    f.write("fix             fMon monomer rigid/nve molecule\n\n")
     f.write("thermo          3000\n")
     f.write("thermo_style    custom step temp press etotal epair vol v_top v_bottom v_Lz\n")
     f.write("thermo_modify   flush yes\n")
