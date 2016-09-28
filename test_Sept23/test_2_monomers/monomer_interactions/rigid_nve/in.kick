@@ -1,0 +1,47 @@
+units           lj
+atom_style      full
+read_data       Kick_in.dat
+neighbor        0.3 bin
+neigh_modify    every 1 delay 1
+bond_style      fene
+bond_coeff      1 30.0 1.5 1.0 1.0
+special_bonds   lj 0.0 1.0 1.0
+angle_style     harmonic
+angle_coeff      1 10.0 180
+pair_style      table linear 1000
+pair_coeff      2 2 tabulated_potential TAIL_TAIL
+pair_coeff      1 2 tabulated_potential HEAD_TAIL
+pair_coeff      1 1 tabulated_potential HEAD_TAIL
+pair_coeff      1 3 tabulated_potential MONOMER_HEAD
+pair_coeff      1 4 tabulated_potential MONOMER_HEAD
+pair_coeff      2 3 tabulated_potential MONOMER_TAIL
+pair_coeff      2 4 tabulated_potential MONOMER_TAIL
+pair_coeff      3 3 tabulated_potential MONOMER_MONOMER
+pair_coeff      3 4 tabulated_potential MONOMER_MONOMER
+pair_coeff      4 4 tabulated_potential MONOMER_MONOMER
+pair_modify        shift yes
+
+# Additional variables to check
+group           monomer type 3 4
+group           head type 1
+group           tail type 2
+group           bilayer union head tail
+variable        top equal bound(monomer,zmax)
+variable        bottom equal bound(monomer,zmin)
+variable        Lz      equal zhi-zlo
+neigh_modify	exclude molecule monomer
+
+# Fixes
+velocity        all create 1.0 1 
+dump            id all xyz 100 kick_out.xyz
+restart         10000 restart.dat
+fix             fNPT bilayer npt temp 1.0 1.0 1 x 0.0 0.0 10 y 0.0 0.0 10 couple xy
+#fix             fMon monomer rigid/npt molecule temp 1.0 1.0 1 x 0.0 0.0 10 y 0.0 0.0 10 couple xy
+#fix             fMon monomer rigid/nvt molecule temp 1.0 1.0 5
+fix		fMon monomer rigid/nve molecule
+
+thermo          3000
+thermo_style    custom step temp press etotal epair vol v_top v_bottom v_Lz
+thermo_modify   flush yes
+timestep        0.008
+run             15000000
